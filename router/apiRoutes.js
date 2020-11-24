@@ -1,85 +1,55 @@
-var db = require("../models");
+const db = require("../models");
+const router = require("express").Router();
 
-module.exports = function(app) {
+  router.get("/api/workouts", async function(req, res) {
+    try {
+    db.Workout.find({})
+    .then(workout => {
+      res.json(workout)
+    })}
+    catch( err ){
+      console.log( ' error: ', err );
+      res.send( { status: false, message: `Sorry: ${err}` } );
+  }
+});
+  router.post("/api/workouts", async function(req, res) {
+    try {
+    const workout = req.body
+    console.log(workout)
+    await db.Workout.create({ workout }).then(response => {
+      res.send(response)
+    })
+  }
+    catch( err ){
+      console.log( ' error: ', err );
+      res.send( { status: false, message: `Sorry: ${err}` } );
+  }
+});
 
-  app.get("/api/workouts", async function(req, res) {
-    const result = await db.Workouts.find({})
-    res.send(result)
-  })
+  router.put("/api/workouts/:id", async function(req, res) {
+    let params = req.params.id;
+    let body = req.body
 
-  app.post("/api/workouts", async function(req, res) {
-    const newWorkout = await db.Workouts.create({})
-    res.send(newWorkout)
-  })
-
-  app.put("/api/workouts", async function(req, res) {
-    let params = JSON.parse(req.params)
-    let body = JSON.parse(req.body)
-    console.log(`PUT req.params._id=${params}, req.body=${body}`)
-    const update = await db.Workouts.findOneAndUpdate({_id: req.params.id }, {exercises: req.body})
-    res.send(update)
+    try {
+      db.Workouts.findOneAndUpdate( params, {$push: {exercises: body}})
+      .then( response => res.json(response))
+      }
+      catch( err ){
+        console.log( ' error: ', err );
+        res.send( { status: false, message: `Sorry: ${err}` } );
+    }
   });
 
-  app.get("/api/workouts/range", async function(req, res) {
-    const result = await db.Workouts.find({})
-    res.send(result)
-  })
-}
-// const db = require("../models");
+  router.get("/api/workouts/range", async function(req, res) {
+    try {
+      db.Workout.find({})
+      .then(workout => {
+        res.json(workout)
+      })}
+      catch( err ){
+        console.log( ' error: ', err );
+        res.send( { status: false, message: `Sorry: ${err}` } );
+    }
+  });
 
-// module.export = function (app) {
-
-//   app.get("/api/workouts", (req, res) => {
-
-//     db.Workouts.find({}).then(dbWorkout => {
-//         dbWorkout.forEach(workouts => {
-//           var total = 0;
-//           workouts.exercises.forEach(e => {
-//           total += e.duration
-//         });
-//         workouts.totalDuration = total;
-//       });
-//         res.json(dbWorkout);
-//       })
-//       .catch(err => {
-//         res.status(400).json(err);
-//       });
-//   });
-
-//   app.post("/api/workouts", ({ body }, res) => {
-
-//     db.Workouts.create(body)
-//       .then(dbWorkout => {
-//         res.json(dbWorkout);
-//       })
-//       .catch(err => {
-//         res.status(400).json(err);
-//       });
-//   });
-
-//   app.put("/api/workouts/:id", function(req, res) {
-//     db.Workouts.findOneAndUpdate(
-//       { _id: req.params.id }, 
-//       { 
-//         $inc: {totalDuration:req.body.duration},
-//         $push: {exercises: req.body }
-//       },
-//       {new: true})
-//       .then(function(dbWorkout) {
-//       res.json(dbWorkout);
-//     }).catch(err => {
-//       res.json(err);
-//     });
-//   });
-
-//   app.get("/api/workouts/range", (req, res) => {
-    
-//     db.Workouts.find({}).then(dbWorkout => {
-//         res.json(dbWorkout);
-//       })
-//       .catch(err => {
-//         res.status(400).json(err);
-//       });
-//   });
-
-// }
+  module.exports = router;
