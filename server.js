@@ -1,5 +1,7 @@
 const express = require('express');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const html = require('./router/htmlRoutes.js');
+const api = require('./router/apiRoutes.js')
 
 const app = express();
 
@@ -24,10 +26,9 @@ process.on('uncaughtException', err => {
 });
 
 // for routes
-require('./router/apiRoutes.js')(app)
-require('./router/htmlRoutes.js')(app)
+app.use(html)
+app.use(api)
 
 app.listen(PORT, function() {
     console.log( `Workout App on: http://localhost:${PORT}` );
 });
-
